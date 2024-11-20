@@ -96,7 +96,7 @@
                       <td>{{ order.description }}</td>
                       <td>{{ order.get_status_display }}</td>
                       <td>{{ order.get_urgency_display }}</td>
-                      <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                      <td>{{ order.created_at|date:"d/m/y" }}</td>
                     </tr>
           
                     <!-- Modal -->
@@ -113,10 +113,34 @@
                             <p><strong>Grau de Urgência:</strong> {{ order.get_urgency_display }}</p>
                             <p><strong>Descrição:</strong> {{ order.description }}</p>
                             <p><strong>Data de Criação:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
+                    
+                            <!-- Listar Comentários -->
+                            <h5>Comentários</h5>
+                            <ul class="list-group mb-3">
+                              {% for comentario in order.comentarios.all %}
+                              <li class="list-group-item">
+                                <strong>{{ comentario.user.username }}:</strong> {{ comentario.comentario }}
+                                <br><small>{{ comentario.created_at|date:"Y-m-d H:i" }}</small>
+                              </li>
+                              {% empty %}
+                              <li class="list-group-item text-muted">Nenhum comentário ainda.</li>
+                              {% endfor %}
+                            </ul>
+                    
+                            <!-- Formulário para adicionar comentário -->
+                            <form method="post" action="{% url 'adicionar_comentario' order.id %}">
+                              {% csrf_token %}
+                              <div class="mb-3">
+                                <label for="comentario" class="form-label">Adicionar Comentário</label>
+                                <textarea class="form-control" id="comentario" name="comentario" rows="3" required></textarea>
+                              </div>
+                              <button type="submit" class="btn btn-primary">Adicionar Comentário</button>
+                            </form>
                           </div>
                         </div>
                       </div>
                     </div>
+                    
                   {% endfor %}
                 {% else %}
                   <tr>
@@ -216,26 +240,28 @@
                   <tr>
                     <th>#</th>
                     <th>Título</th>
+                    <th>Descrição</th>
                     <th>Status</th>
                     <th>Grau de Urgência</th>
                     <th>Data de Criação</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr data-bs-toggle="modal" data-bs-target="#orderDetailsModal1">
-                    <td>1001</td>
-                    <td>Problema no servidor</td>
-                    <td>Aberto</td>
-                    <td>Alta</td>
-                    <td>2024-09-17</td>
+                  {% for ordem in user_orders %}
+
+                  <tr data-bs-toggle="modal" data-bs-target="#ordemModal{{ ordem.id }}">
+                    <td>{{ ordem.id }}</td>
+                    <td>{{ ordem.title }}</td>
+                    <td>{{ ordem.description }}</td>
+                    <td>{{ ordem.status }}</td>
+                    <td>{{ ordem.urgency }}</td>
+                    <td>{{ ordem.created_at|date:"d/m/y" }}</td>
                   </tr>
-                  <tr data-bs-toggle="modal" data-bs-target="#orderDetailsModal2">
-                    <td>1002</td>
-                    <td>Erro no sistema</td>
-                    <td>Em andamento</td>
-                    <td>Média</td>
-                    <td>2024-09-16</td>
+                  {% empty %}
+                  <tr>
+                    <td colspan="6" class="text-center">Nenhuma ordem encontrada.</td>
                   </tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
@@ -243,6 +269,69 @@
         </div>
       </div>
     </div>
+    
+    {% for ordem in user_orders %}
+      <div class="modal fade" id="ordemModal{{ ordem.id }}" tabindex="-1" aria-labelledby="ordemModalLabel{{ ordem.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="ordemModalLabel{{ ordem.id }}">Gerenciar Ordem #{{ ordem.id }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <!-- Formulário para atualizar informações da ordem -->
+              <form method="post" action="{% url 'atualizar_ordem' ordem.id %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label for="title" class="form-label">Título</label>
+                  <input type="text" class="form-control" id="title" name="title" value="{{ ordem.title }}" required>
+                </div>
+                <div class="mb-3">
+                  <label for="description" class="form-label">Descrição</label>
+                  <textarea class="form-control" id="description" name="description" rows="3" required>{{ ordem.description }}</textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="status" class="form-label">Status</label>
+                  <select class="form-select" id="status" name="status">
+                    {% for status, status_display in ordem.STATUS_CHOICES %}
+                    <option value="{{ status }}" {% if status == ordem.status %}selected{% endif %}>{{ status_display }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="urgency" class="form-label">Urgência</label>
+                  <select class="form-select" id="urgency" name="urgency">
+                    {% for urgency, urgency_display in ordem.URGENCY_LEVEL_CHOICES %}
+                    <option value="{{ urgency }}" {% if urgency == ordem.urgency %}selected{% endif %}>{{ urgency_display }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-success">Atualizar Ordem</button>
+              </form>
+
+              <hr>
+
+              <!-- Botões para outras ações -->
+              <div class="d-flex justify-content-between">
+                <form method="post" action="{% url 'concluir_ordem' ordem.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-primary">Concluir Ordem</button>
+                </form>
+                <form method="post" action="{% url 'cancelar_ordem' ordem.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-warning">Cancelar Ordem</button>
+                </form>
+                <form method="post" action="{% url 'excluir_ordem' ordem.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger">Excluir Ordem</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    
 
     <div class="modal fade" id="addOrderModal" tabindex="-1" aria-labelledby="addOrderModalLabel" aria-hidden="true">
       <div class="modal-dialog">
