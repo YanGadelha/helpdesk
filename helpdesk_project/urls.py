@@ -4,6 +4,6 @@ from django.contrib import admin
 from helpdesk import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('home', views.home, name='home'),
+    path('admin/', admin.site.urls),
+    path('', include('helpdesk.urls')),
 ]
