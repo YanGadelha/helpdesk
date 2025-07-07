@@ -36,9 +36,12 @@
         <main class="col-12">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Ordens de Serviço</h1>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addOrderModal">
-              <i class="bi bi-plus-circle"></i> Adicionar Ordem de Serviço
-            </button>
+            {% if user.tipo_usuario == "usuario" %}
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addOrderModal">
+                <i class="bi bi-plus-circle"></i> Adicionar Ordem de Serviço
+              </button>
+            {% endif %}
+
           </div>
           <div class="container my-4">
             <div class="row justify-content-center">
@@ -134,8 +137,21 @@
                                 <label for="comentario" class="form-label">Adicionar Comentário</label>
                                 <textarea class="form-control" id="comentario" name="comentario" rows="3" required></textarea>
                               </div>
-                              <button type="submit" class="btn btn-primary">Adicionar Comentário</button>
+                              <button type="submit" class="btn btn-primary">Salvar</button>
                             </form>
+
+                            {% if user.tipo_usuario == "tecnico"%}
+                              <div class="d-flex justify-content-start mb-3 mt-3">
+                                <form method="post" action="{% url 'concluir_ordem' order.id %}">
+                                  {% csrf_token %}
+                                  <button type="submit" class="btn btn-success">Concluir Ordem</button>
+                                </form>
+                                <form class="ml-4" method="post" action="{% url 'cancelar_ordem' order.id %}">
+                                  {% csrf_token %}
+                                  <button type="submit" class="btn btn-warning">Cancelar Ordem</button>
+                                </form>
+                              </div>
+                            {% endif %}
                           </div>
                         </div>
                       </div>
@@ -366,7 +382,7 @@
       </div>
     </div>
   
-    <button class="chat-btn" onclick="toggleChat()">
+    <!--<button class="chat-btn" onclick="toggleChat()">
         <i class="bi bi-chat-dots-fill"></i>
       </button>
   
@@ -385,7 +401,7 @@
             <button type="button" class="send-btn btn btn-primary" onclick="sendMessage()">Enviar</button>
           </div>
         </div>
-      </div>
+      </div>-->
     <script src="{% static 'js/chatbot.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

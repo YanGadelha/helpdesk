@@ -11,6 +11,15 @@ class CustomUser(AbstractUser):
     company = models.CharField(max_length=100, null=True, blank=True)
     occupation = models.CharField(max_length=100, null=True, blank=True)
     sector = models.CharField(max_length=100, null=True, blank=True)
+    TIPO_USUARIO_CHOICES = (
+        ('usuario', 'Usuário'),
+        ('tecnico', 'Técnico'),
+    )
+    tipo_usuario = models.CharField(
+        max_length=10,
+        choices=TIPO_USUARIO_CHOICES,
+        default='usuario'
+    )
     
     def __str__(self):
         return self.username

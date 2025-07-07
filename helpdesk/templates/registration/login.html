@@ -57,6 +57,15 @@
             <label for="id_password2">Confirmar Senha</label>
             {{ register_form.password2|add_class:"form-control"  }}
         </div>
+        <div class="form-group">
+           <label>Tipo de conta</label>
+            {% for radio in register_form.tipo_usuario %}
+                <div class="form-check">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+            {% endfor %}
+        </div>
         <br />
         <button type="submit" name="register-form" class="btn btn-success">Criar Conta</button>
         <p class="toggle-form">

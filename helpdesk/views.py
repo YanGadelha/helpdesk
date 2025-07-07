@@ -161,14 +161,18 @@ def atualizar_ordem(request, ordem_id):
     return redirect('home')
 
 def concluir_ordem(request, ordem_id):
-    ordem = get_object_or_404(OrdemServico, id=ordem_id, user=request.user)
+    ordem = get_object_or_404(OrdemServico, id=ordem_id)
+    if not (request.user.tipo_usuario == "tecnico" or ordem.user == request.user):
+        return HttpResponseForbidden("Você não tem permissão para concluir esta ordem.")
     ordem.status = 'concluido'
     ordem.save()
     messages.success(request, 'Ordem concluída com sucesso.')
     return redirect('home')
 
 def cancelar_ordem(request, ordem_id):
-    ordem = get_object_or_404(OrdemServico, id=ordem_id, user=request.user)
+    ordem = get_object_or_404(OrdemServico, id=ordem_id)
+    if not (request.user.tipo_usuario == "tecnico" or ordem.user == request.user):
+        return HttpResponseForbidden("Você não tem permissão para cancelar esta ordem.")
     ordem.status = 'nao_concluido'
     ordem.save()
     messages.success(request, 'Ordem cancelada com sucesso.')
